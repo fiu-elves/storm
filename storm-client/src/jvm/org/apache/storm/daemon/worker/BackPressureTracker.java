@@ -49,12 +49,8 @@ public class BackPressureTracker {
                 entry -> new BackpressureState(entry.getValue())));
     }
 
-    public BackpressureState getBackpressureState(Integer taskId) {
-        return tasks.get(taskId);
-    }
-
-    private void recordNoBackPressure(BackpressureState state) {
-        state.backpressure.set(false);
+    private void recordNoBackPressure(Integer taskId) {
+        tasks.get(taskId).backpressure.set(false);
     }
 
     /**
@@ -64,8 +60,8 @@ public class BackPressureTracker {
      *
      * @return true if an update was recorded, false if taskId is already under BP
      */
-    public boolean recordBackPressure(BackpressureState state) {
-        return state.backpressure.getAndSet(true) == false;
+    public boolean recordBackPressure(Integer taskId) {
+        return tasks.get(taskId).backpressure.getAndSet(true) == false;
     }
 
     // returns true if there was a change in the BP situation
@@ -75,7 +71,7 @@ public class BackPressureTracker {
         for (Entry<Integer, BackpressureState> entry : tasks.entrySet()) {
             BackpressureState state = entry.getValue();
             if (state.backpressure.get() && state.queue.isEmptyOverflow()) {
-                recordNoBackPressure(state);
+                recordNoBackPressure(entry.getKey());
                 changed = true;
             }
         }
@@ -99,24 +95,11 @@ public class BackPressureTracker {
         }
         return new BackPressureStatus(workerId, bpTasks, nonBpTasks);
     }
-
-    public int getLastOverflowCount(BackpressureState state) {
-        return state.lastOverflowCount;
-    }
-
-    public void setLastOverflowCount(BackpressureState state, int value) {
-        state.lastOverflowCount = value;
-    }
-
-
     
-    public static class BackpressureState {
+    private static class BackpressureState {
         private final JCQueue queue;
         //No task is under backpressure initially
         private final AtomicBoolean backpressure = new AtomicBoolean(false);
-        //The overflow count last time BP status was sent
-        private int lastOverflowCount = 0;
-
 
         BackpressureState(JCQueue queue) {
             this.queue = queue;

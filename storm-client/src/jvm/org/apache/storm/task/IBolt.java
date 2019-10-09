@@ -13,6 +13,8 @@
 package org.apache.storm.task;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Map;
 import org.apache.storm.Config;
 import org.apache.storm.tuple.Tuple;
@@ -72,4 +74,6 @@ public interface IBolt extends Serializable {
      * <p>The one context where cleanup is guaranteed to be called is when a topology is killed when running Storm in local mode.
      */
     void cleanup();
+
+
 }

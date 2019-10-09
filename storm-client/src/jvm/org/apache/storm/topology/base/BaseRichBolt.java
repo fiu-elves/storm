@@ -13,9 +13,44 @@
 package org.apache.storm.topology.base;
 
 import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.tuple.Tuple;
 
-public abstract class BaseRichBolt extends BaseComponent implements IRichBolt {
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.sql.Timestamp;
+import java.util.Date;
+
+public abstract class BaseRichBolt extends BaseComponent implements IRichBolt{
     @Override
     public void cleanup() {
+    }
+
+    Tuple input;
+    private String stateFileName;
+    public void saveState(Tuple input) throws FileNotFoundException {
+        System.out.println("Bolt function: State save function is called.");
+
+        Date date= new Date();
+        long time = date.getTime();
+        System.out.println("Time in Milliseconds: " + time);
+        Timestamp ts = new Timestamp(time);
+        System.out.println("Current Time Stamp: " + ts);
+
+        String sentence = input.getString(0);
+        //[PL20190911] Save the state into a file.
+        System.out.println("input: " + sentence);
+        System.out.println("Saving state...");
+        setStateFileName("state.txt_" + time);
+        try (PrintWriter out = new PrintWriter(getStateFileName())) {
+            out.println(sentence);
+        }
+    }
+
+    public String getStateFileName() {
+        return stateFileName;
+    }
+
+    public void setStateFileName(String stateFileName) {
+        this.stateFileName = stateFileName;
     }
 }
